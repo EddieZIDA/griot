@@ -1,0 +1,243 @@
+/* Identité visuelle de Griot : tons terre/ocre + indigo, en surcouche du
+   thème bslib "shiny" (couleurs de base définies via shiny.ui.Theme dans
+   chat.py — ce fichier ne fait que le layout/habillage que Sass seul ne
+   couvre pas). */
+
+.griot-header {
+  text-align: center;
+  padding: 1.5rem 1rem 1.1rem;
+  margin-bottom: 0;
+  /* Dégradé léger (8%/6% d'opacité) plutôt qu'un aplat sable uni.
+     Contraste du titre vérifié sur les deux bords du dégradé : 3.51:1 et
+     au-delà (seuil AA "grand texte" = 3:1) — cf. tableau de vérification. */
+  background: linear-gradient(
+    120deg,
+    rgba(193, 98, 43, 0.08) 0%,
+    rgba(250, 246, 240, 1) 55%,
+    rgba(43, 58, 103, 0.06) 100%
+  );
+}
+
+/* Liseré décoratif façon bande tissée (chevrons alternés terracotta/
+   indigo) : accent graphique ponctuel, pas figuratif, sous l'en-tête. */
+.griot-header::after {
+  content: "";
+  display: block;
+  height: 5px;
+  margin-top: 1.1rem;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    #c1622b 0,
+    #c1622b 5px,
+    transparent 5px,
+    transparent 10px,
+    #2b3a67 10px,
+    #2b3a67 15px,
+    transparent 15px,
+    transparent 20px
+  );
+  opacity: 0.5;
+}
+
+.griot-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+}
+
+.griot-brand svg {
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+}
+
+.griot-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  font-size: 2.1rem;
+  color: var(--bs-primary);
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.griot-tagline {
+  font-size: 0.875rem;
+  color: var(--bs-secondary-color);
+  margin: 0.3rem 0 0;
+}
+
+/* Bulle utilisateur : teinte légère de l'accent terracotta plutôt que le
+   bleu par défaut (le texte reste en couleur de corps normale, seul le
+   fond change, donc le contraste texte/fond n'est pas affecté). */
+shiny-chat-container {
+  --shiny-chat-user-message-bg: rgba(193, 98, 43, 0.1);
+}
+
+/* Apparition des réponses de l'assistant : léger fondu + déplacement
+   plutôt qu'un texte qui apparaît d'un bloc. Ne s'applique qu'une fois,
+   à l'insertion de la bulle (pas à chaque mise à jour du flux streamé). */
+@keyframes griot-message-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.shiny-chat-message:not(.shiny-chat-user-message) {
+  animation: griot-message-in 0.45s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shiny-chat-message:not(.shiny-chat-user-message) {
+    animation: none;
+  }
+}
+
+/* Appel d'outil (search_news) : entièrement supprimé du rendu (pas juste
+   masqué en CSS) via SHINYCHAT_TOOL_DISPLAY=none, réglé dans chat.py.
+   shinychat ne crée alors même plus les éléments .shiny-tool-card /
+   .shiny-tool-request / .shiny-tool-result — rien à cacher ici. */
+
+/* Citations [1], [2, 3]... : le system prompt les fait sortir en code
+   Markdown inline (`` `[1]` ``) pour qu'elles deviennent un <code>
+   ciblable en CSS, plutôt que du texte brut indiscernable du reste de
+   la phrase. Exclu des blocs de code réels (pre code), qui n'ont pas
+   lieu d'être dans ce contexte mais par précaution. */
+.shiny-chat-message-content code:not(pre code) {
+  background-color: rgba(193, 98, 43, 0.14);
+  color: #8f4520;
+  border: 1px solid rgba(193, 98, 43, 0.35);
+  border-radius: 999px;
+  padding: 0.05em 0.55em;
+  font-size: 0.82em;
+  font-weight: 600;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+/* Sources citées : le system prompt les fait sortir sous forme de
+   citation Markdown (lignes "> "), ce qui produit un <blockquote> dans
+   le HTML rendu — on le stylise comme un bloc distinct, séparé du corps
+   de la réponse. */
+.shiny-chat-message-content blockquote {
+  background-color: rgba(43, 58, 103, 0.05);
+  border-left: 3px solid var(--bs-secondary);
+  border-radius: 4px;
+  padding: 0.65rem 1rem;
+  margin: 1rem 0 0;
+  font-size: 0.875em;
+}
+
+.shiny-chat-message-content blockquote > :first-child {
+  margin-top: 0;
+}
+
+.shiny-chat-message-content blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.shiny-chat-message-content blockquote a {
+  color: var(--bs-secondary);
+}
+
+/* ============================================================
+   Panneau d'historique ancré (docked), pas overlay modal.
+   .shiny-chat-history est un enfant direct de shiny-chat-container
+   (frère de .shiny-chat-wrapper), inséré/retiré du DOM au clic sur le
+   déclencheur natif — structure vérifiée dans le DOM réel, pas
+   supposée. On l'intègre à la grille du conteneur au lieu de le
+   laisser en overlay position:absolute plein écran.
+   ============================================================ */
+shiny-chat-container {
+  --shiny-chat-history-accent: var(--bs-primary);
+  --shiny-chat-history-bg: #f2eadc;
+  --shiny-chat-history-border-color: #e4d5be;
+  grid-template-columns: 1fr;
+}
+
+shiny-chat-container:has(> .shiny-chat-history) {
+  grid-template-columns: 18rem 1fr;
+}
+
+.shiny-chat-wrapper {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+}
+
+shiny-chat-container:not(:has(> .shiny-chat-history)) .shiny-chat-wrapper {
+  grid-column: 1;
+}
+
+/* BUG CRITIQUE corrigé ici : shinychat.css est injecté APRÈS ce fichier
+   dans le <head> (vérifié dans le HTML rendu), donc à spécificité égale
+   sa règle .shiny-chat-history{position:absolute;inset:0} gagnait sur
+   la nôtre — le panneau restait visuellement étroit (18rem) mais son
+   VRAI hitbox de clic couvrait toute la largeur du conteneur,
+   interceptant les clics destinés au champ de saisie du chat, y
+   compris quand le panneau était "docké". Confirmé avec
+   document.elementFromPoint() au centre du champ de saisie : c'est
+   bien .shiny-chat-history qui répondait. Corrigé en qualifiant les
+   sélecteurs avec le parent pour battre la spécificité native (0,1,0)
+   plutôt qu'en ajoutant !important partout. */
+shiny-chat-container > .shiny-chat-history {
+  grid-column: 1;
+  grid-row: 1;
+  position: static;
+  inset: auto;
+  z-index: auto;
+  width: auto;
+  height: 100%;
+  overflow: hidden;
+}
+
+.shiny-chat-history .shiny-chat-history-scrim {
+  display: none;
+}
+
+.shiny-chat-history .shiny-chat-history-drawer {
+  position: static;
+  inset: auto;
+  width: 100%;
+  height: 100%;
+  box-shadow: none;
+  border-inline-end: 1px solid var(--shiny-chat-history-border-color);
+  animation: none !important;
+}
+
+/* "New" -> "Nouvelle conversation" est bien plus long que l'original,
+   ce qui écraserait le champ de recherche sur la même ligne dans un
+   panneau étroit : on laisse la recherche passer à la ligne plutôt que
+   de parier sur une largeur de panneau suffisante. */
+.shiny-chat-history-drawer .shiny-chat-history-toprow {
+  flex-wrap: wrap;
+}
+
+.shiny-chat-history-drawer .shiny-chat-history-search-wrap {
+  flex: 1 1 100%;
+}
+
+/* Le déclencheur natif sert de bouton "replier/déplier" : visible en
+   coin quand le panneau est fermé (pour l'ouvrir), masqué quand il est
+   ouvert (le bouton "fermer" natif du panneau prend le relais, évite
+   la superposition avec l'en-tête du panneau). */
+.shiny-chat-history-trigger {
+  position: absolute;
+  top: 0.6rem;
+  inset-inline-start: 0.6rem;
+  z-index: 3;
+}
+
+shiny-chat-container:has(> .shiny-chat-history) .shiny-chat-history-trigger {
+  display: none;
+}
+
+.shiny-chat-history-item.active {
+  border-left: 3px solid var(--bs-primary);
+  padding-left: calc(0.5rem - 3px);
+}

@@ -1,0 +1,13 @@
+.env
+.venv/
+.git/
+.github/
+__pycache__/
+.pytest_cache/
+chroma_db/
+.shinychat/
+logs/
+lib/
+tests/
+scripts/
+_backup_*/

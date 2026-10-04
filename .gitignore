@@ -1,0 +1,9 @@
+.venv/
+.env
+__pycache__/
+.pytest_cache/
+chroma_db/
+.shinychat/
+logs/
+lib/
+_backup_*/

@@ -1,0 +1,15 @@
+# Versions épinglées : chat.py s'appuie sur deux points fragiles de
+# shinychat 0.6.0 (import de shinychat._history.HistoryOptions et
+# décorateur transform_assistant_response, déprécié). Tester avant de
+# monter de version.
+chatlas[google]==0.19.2
+google-genai==2.14.0
+shiny==1.6.3
+shinychat==0.6.0
+libsass==0.23.0
+chromadb==1.5.9
+feedparser==6.0.14
+trafilatura==2.2.0
+python-dotenv==1.2.2
+# Synchronisation de la base avec Hugging Face (sync_db.py).
+huggingface_hub>=0.25

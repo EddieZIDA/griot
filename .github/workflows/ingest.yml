@@ -1,0 +1,40 @@
+# Ingestion planifiée : récupère la base, ingère les nouveaux articles,
+# republie la base, puis redémarre le Space pour qu'il la recharge.
+#
+# Secrets du dépôt GitHub : GOOGLE_API_KEY, HF_TOKEN (écriture).
+# Variables du dépôt GitHub : GRIOT_DB_REPO, GRIOT_SPACE_ID.
+name: Ingestion
+
+on:
+  schedule:
+    - cron: "17 */6 * * *" # toutes les 6 heures (UTC)
+  workflow_dispatch:
+
+concurrency:
+  group: ingestion
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      GRIOT_DB_REPO: ${{ vars.GRIOT_DB_REPO }}
+      GRIOT_SPACE_ID: ${{ vars.GRIOT_SPACE_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Télécharger la base
+        run: python sync_db.py pull
+      - name: Ingérer les nouveaux articles
+        run: python ingest.py
+      - name: Publier la base
+        run: python sync_db.py push
+      - name: Redémarrer le Space
+        run: python sync_db.py restart
