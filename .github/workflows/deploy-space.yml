@@ -34,6 +34,15 @@ jobs:
           fetch-depth: 0
       - name: Pousser vers le Space
         run: |
+          # Un espace ou un retour à la ligne collé par mégarde dans le
+          # secret rend l'URL invalide ("Port number was not a decimal
+          # number") : on nettoie les deux valeurs avant de s'en servir.
+          TOKEN="$(printf '%s' "$HF_TOKEN" | tr -d '[:space:]')"
+          SPACE="$(printf '%s' "$GRIOT_SPACE_ID" | tr -d '[:space:]')"
+          if [ -z "$TOKEN" ] || [ -z "$SPACE" ]; then
+            echo "HF_TOKEN (secret) ou GRIOT_SPACE_ID (variable) manquant."
+            exit 1
+          fi
           git push --force \
-            "https://${GRIOT_SPACE_ID%%/*}:${HF_TOKEN}@huggingface.co/spaces/${GRIOT_SPACE_ID}" \
+            "https://${SPACE%%/*}:${TOKEN}@huggingface.co/spaces/${SPACE}" \
             HEAD:main

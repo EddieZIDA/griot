@@ -29,10 +29,15 @@ from utils import CHROMA_DIR
 load_dotenv()
 
 
+def _token() -> str | None:
+    # .strip() : un retour à la ligne collé avec le jeton le rend invalide.
+    return (os.environ.get("HF_TOKEN") or "").strip() or None
+
+
 def _api():
     from huggingface_hub import HfApi
 
-    return HfApi(token=os.environ.get("HF_TOKEN"))
+    return HfApi(token=_token())
 
 
 def pull(repo_id: str) -> None:
@@ -44,7 +49,7 @@ def pull(repo_id: str) -> None:
             repo_id,
             repo_type="dataset",
             local_dir=CHROMA_DIR,
-            token=os.environ.get("HF_TOKEN"),
+            token=_token(),
         )
         print(f"Base téléchargée depuis {repo_id}")
     except RepositoryNotFoundError:
@@ -79,7 +84,7 @@ def push(repo_id: str) -> None:
 
 
 def restart() -> None:
-    space_id = os.environ.get("GRIOT_SPACE_ID")
+    space_id = (os.environ.get("GRIOT_SPACE_ID") or "").strip()
     if not space_id:
         print("GRIOT_SPACE_ID non défini : aucun Space à redémarrer.")
         return
@@ -95,7 +100,7 @@ def main(argv: list[str]) -> int:
     if command == "restart":
         restart()
         return 0
-    repo_id = os.environ.get("GRIOT_DB_REPO")
+    repo_id = (os.environ.get("GRIOT_DB_REPO") or "").strip()
     if not repo_id:
         print("GRIOT_DB_REPO non défini : synchronisation ignorée.")
         return 0
