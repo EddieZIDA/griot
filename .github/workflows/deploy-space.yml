@@ -43,6 +43,15 @@ jobs:
             echo "HF_TOKEN (secret) ou GRIOT_SPACE_ID (variable) manquant."
             exit 1
           fi
-          git push --force \
-            "https://${SPACE%%/*}:${TOKEN}@huggingface.co/spaces/${SPACE}" \
-            HEAD:main
+          # Un jeton Hugging Face ne contient que "hf_" suivi de lettres
+          # et de chiffres. Tout autre contenu signale un secret mal saisi.
+          if ! printf '%s' "$TOKEN" | grep -Eq '^hf_[A-Za-z0-9]+$'; then
+            echo "Le secret HF_TOKEN n'a pas la forme d'un jeton Hugging Face"
+            echo "(attendu : hf_ suivi de lettres et chiffres, rien d'autre)."
+            echo "Longueur reçue : ${#TOKEN} caractères."
+            exit 1
+          fi
+          # Jeton transmis par en-tête, jamais dans l'URL.
+          AUTH="$(printf '%s:%s' "${SPACE%%/*}" "$TOKEN" | base64 -w0)"
+          git -c http.extraheader="Authorization: Basic ${AUTH}" push --force \
+            "https://huggingface.co/spaces/${SPACE}" HEAD:main
