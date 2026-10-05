@@ -10,14 +10,52 @@ pinned: false
 
 # Griot
 
-Assistant conversationnel d'actualité en français, spécialisé sur le Burkina
-Faso, le Sénégal, le Mali, la Côte d'Ivoire, et sur l'actualité
-internationale et tech/IA francophone (catégorie "Monde").
+**Agent conversationnel d'actualité ouest-africaine, par RAG strict et sources citées**
+
+![Python](https://img.shields.io/badge/Python-3.12-blue)
+![LLM](https://img.shields.io/badge/LLM-Gemini%202.5%20Flash-4285F4)
+![Base vectorielle](https://img.shields.io/badge/Base%20vectorielle-Chroma-orange)
+![Tests](https://img.shields.io/badge/tests-pytest-success)
+![Docker](https://img.shields.io/badge/Docker-Hugging%20Face%20Spaces-2496ED?logo=docker&logoColor=white)
+
+> Couverture : Burkina Faso, Sénégal, Mali, Côte d'Ivoire, et l'actualité
+> internationale et tech/IA francophone (catégorie "Monde") · 15 médias
+> reconnus · Ingestion automatique toutes les 6 heures
+
+---
+
+## En bref
+
+Griot répond en français aux questions d'actualité, par exemple "Quoi de
+neuf au Burkina Faso cette semaine ?" ou "Que dit la presse sur l'IA en ce
+moment ?".
 
 **Principe non négociable : RAG strict.** Griot ne répond jamais à partir de
 sa mémoire ni via une recherche web. Il ne répond qu'à partir d'articles de
-presse déjà ingérés et vectorisés localement (Chroma), et cite ses sources.
-S'il n'a aucun article pertinent, il le dit.
+presse déjà ingérés et vectorisés (Chroma), et cite ses sources. S'il n'a
+aucun article pertinent, il le dit.
+
+| Choix de conception | Pourquoi |
+|---|---|
+| Réponses uniquement à partir d'articles ingérés | Pas d'hallucination sur l'actualité : chaque affirmation renvoie à un article |
+| Citations numérotées par le code, pas par le LLM | Un numéro de source ne peut pas être inventé |
+| Deux outils de récupération (`search_news`, `latest_news`) | Une question sur un sujet précis et une demande de "journal" ne se traitent pas de la même façon |
+| Filtre de pertinence (score minimal et marge) | Mieux vaut dire "je n'ai rien" que citer un article hors sujet |
+| Classement par pays selon le sujet de l'article, sans appel LLM | Un journal burkinabè qui parle de l'étranger ne pollue pas le fil "Burkina Faso" |
+| Limites par visite et par jour sur la démo | Tous les visiteurs partagent le même quota Gemini |
+
+## Stack technique
+
+- **LLM** : Gemini 2.5 Flash, via `chatlas` (appel d'outils)
+- **Embeddings** : `gemini-embedding-001`
+- **Base vectorielle** : Chroma (locale)
+- **Ingestion** : flux RSS (`feedparser`), extraction du texte complet (`trafilatura`)
+- **Interface** : Shiny et shinychat
+- **Déploiement** : Docker, Hugging Face Spaces, GitHub Actions (déploiement et ingestion planifiée)
+- **Qualité** : pytest, tests sans appel à l'API (embeddings fabriqués)
+- **Environnement** : Python 3.12
+
+---
 
 ## Architecture
 
@@ -199,3 +237,10 @@ une collection Chroma temporaire avec des embeddings fabriqués.
   cite ni le pays ni une grande ville peut partir à tort dans "monde".
 - Les tests ne couvrent pas l'interface ni les appels réels à Gemini.
 - Ne pas lancer deux ingestions en même temps sur la même base.
+
+---
+
+## Auteur
+
+**Wend Kouni Eddie Eliel ZIDA**, élève-ingénieur Big Data & IA à l'ISGA Rabat.
+[Portfolio](https://eddiezida.github.io) · [LinkedIn](https://www.linkedin.com/in/wend-kouni-eddie-eliel-zida-501815260/) · [GitHub](https://github.com/EddieZIDA)
